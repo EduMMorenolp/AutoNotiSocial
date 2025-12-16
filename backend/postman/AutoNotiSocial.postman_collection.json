@@ -1,0 +1,878 @@
+{
+	"info": {
+		"_postman_id": "autonotisocial-api",
+		"name": "AutoNotiSocial API",
+		"description": "API para el sistema de extracción de noticias y publicación automática",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "health"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Sources",
+			"item": [
+				{
+					"name": "List Sources",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/sources",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sources"],
+							"query": [
+								{
+									"key": "enabled",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Source",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/sources/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sources", "1"]
+						}
+					}
+				},
+				{
+					"name": "Create Source",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Dev.to\",\n    \"url\": \"https://dev.to\",\n    \"selectors\": {\n        \"articleList\": \".crayons-story\",\n        \"title\": \".crayons-story__title a\",\n        \"image\": \".crayons-story__cover img\",\n        \"author\": \".crayons-story__meta a.crayons-story__secondary\",\n        \"content\": \".crayons-article__main\"\n    },\n    \"schedule\": \"0 */6 * * *\",\n    \"enabled\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/sources",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sources"]
+						}
+					}
+				},
+				{
+					"name": "Create Source - Hacker News",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Hacker News\",\n    \"url\": \"https://news.ycombinator.com\",\n    \"selectors\": {\n        \"articleList\": \".athing\",\n        \"title\": \".titleline a\"\n    },\n    \"schedule\": \"0 */6 * * *\",\n    \"enabled\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/sources",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sources"]
+						}
+					}
+				},
+				{
+					"name": "Update Source",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"schedule\": \"0 */12 * * *\",\n    \"enabled\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/sources/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sources", "1"]
+						}
+					}
+				},
+				{
+					"name": "Toggle Source",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/sources/1/toggle",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sources", "1", "toggle"]
+						}
+					}
+				},
+				{
+					"name": "Scrape Source Manually",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usePuppeteer\": false,\n    \"limit\": 5,\n    \"generateSummaries\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/sources/1/scrape",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sources", "1", "scrape"]
+						}
+					}
+				},
+				{
+					"name": "Delete Source",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/sources/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sources", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Default Selectors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/sources/selectors/defaults",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "sources", "selectors", "defaults"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Articles",
+			"item": [
+				{
+					"name": "List Articles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/articles?limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "articles"],
+							"query": [
+								{
+									"key": "source_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "from_date",
+									"value": "2024-01-01",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "javascript",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "offset",
+									"value": "0",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Pending Articles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/articles/pending?limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "articles", "pending"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Article Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/articles/stats/count",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "articles", "stats", "count"]
+						}
+					}
+				},
+				{
+					"name": "Get Article",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/articles/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "articles", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Article",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/articles/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "articles", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Old Articles",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/articles/old/30",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "articles", "old", "30"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Summaries",
+			"item": [
+				{
+					"name": "List Summaries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/summaries?limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "summaries"],
+							"query": [
+								{
+									"key": "ai_provider",
+									"value": "gemini",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/summaries/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "summaries", "1"]
+						}
+					}
+				},
+				{
+					"name": "Generate Summary",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/summaries/generate/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "summaries", "generate", "1"]
+						}
+					}
+				},
+				{
+					"name": "Regenerate Summary",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/summaries/regenerate/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "summaries", "regenerate", "1"]
+						}
+					}
+				},
+				{
+					"name": "Process Pending Articles",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/summaries/process-pending?limit=5",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "summaries", "process-pending"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Summary",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"linkedin_post\": \"Updated LinkedIn post content...\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/summaries/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "summaries", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Unpublished (LinkedIn)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/summaries/unpublished/linkedin",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "summaries", "unpublished", "linkedin"]
+						}
+					}
+				},
+				{
+					"name": "Get Unpublished (Instagram)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/summaries/unpublished/instagram",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "summaries", "unpublished", "instagram"]
+						}
+					}
+				},
+				{
+					"name": "Delete Summary",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/summaries/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "summaries", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Publications",
+			"item": [
+				{
+					"name": "List Publications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/publications?limit=20",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "publications"],
+							"query": [
+								{
+									"key": "platform",
+									"value": "linkedin",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "published",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Publication Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/publications/stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "publications", "stats"]
+						}
+					}
+				},
+				{
+					"name": "Get Pending Publications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/publications/pending",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "publications", "pending"],
+							"query": [
+								{
+									"key": "platform",
+									"value": "linkedin",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Publication",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/publications/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "publications", "1"]
+						}
+					}
+				},
+				{
+					"name": "Create Publication (Queue)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"summary_id\": 1,\n    \"platform\": \"linkedin\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/publications",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "publications"]
+						}
+					}
+				},
+				{
+					"name": "Update Publication Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"published\",\n    \"post_id\": \"12345\",\n    \"post_url\": \"https://linkedin.com/posts/12345\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/publications/1/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "publications", "1", "status"]
+						}
+					}
+				},
+				{
+					"name": "Delete Publication",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/publications/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "publications", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Scheduler",
+			"item": [
+				{
+					"name": "Get Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/scheduler/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "scheduler", "status"]
+						}
+					}
+				},
+				{
+					"name": "Start Scheduler",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/scheduler/start",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "scheduler", "start"]
+						}
+					}
+				},
+				{
+					"name": "Stop Scheduler",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/scheduler/stop",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "scheduler", "stop"]
+						}
+					}
+				},
+				{
+					"name": "Restart Scheduler",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/scheduler/restart",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "scheduler", "restart"]
+						}
+					}
+				},
+				{
+					"name": "Run Source Manually",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/scheduler/run/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "scheduler", "run", "1"]
+						}
+					}
+				},
+				{
+					"name": "Run All Sources",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/scheduler/run-all",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "scheduler", "run-all"]
+						}
+					}
+				},
+				{
+					"name": "Process Pending",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/scheduler/process-pending?limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "scheduler", "process-pending"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Settings",
+			"item": [
+				{
+					"name": "Get Settings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/settings",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "settings"]
+						}
+					}
+				},
+				{
+					"name": "Get AI Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/settings/ai",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "settings", "ai"]
+						}
+					}
+				},
+				{
+					"name": "Switch to Gemini",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"provider\": \"gemini\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/settings/ai-provider",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "settings", "ai-provider"]
+						}
+					}
+				},
+				{
+					"name": "Switch to Ollama",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"provider\": \"ollama\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/settings/ai-provider",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "settings", "ai-provider"]
+						}
+					}
+				},
+				{
+					"name": "Test AI",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"prompt\": \"Escribe un resumen corto sobre Node.js en 2 oraciones.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/settings/ai/test",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "settings", "ai", "test"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Logs",
+			"item": [
+				{
+					"name": "Get Logs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/logs?limit=50",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "logs"],
+							"query": [
+								{
+									"key": "level",
+									"value": "error",
+									"disabled": true
+								},
+								{
+									"key": "category",
+									"value": "scraper",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "failed",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "50"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Log Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/logs/stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "logs", "stats"],
+							"query": [
+								{
+									"key": "since",
+									"value": "2024-01-01",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Log Levels",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/logs/levels",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "logs", "levels"]
+						}
+					}
+				},
+				{
+					"name": "Get Log Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/logs/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "logs", "categories"]
+						}
+					}
+				},
+				{
+					"name": "Get Log by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/logs/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "logs", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Old Logs",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/logs/old/7",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "logs", "old", "7"]
+						}
+					}
+				},
+				{
+					"name": "Clear All Logs",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/logs?confirm=true",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "logs"],
+							"query": [
+								{
+									"key": "confirm",
+									"value": "true"
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}
