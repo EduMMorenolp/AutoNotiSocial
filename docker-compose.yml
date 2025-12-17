@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Backend, Frontend y Ollama en el mismo contenedor
+  autonotisocial:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: autonotisocial
+    restart: unless-stopped
+    ports:
+      - "3000:3000" # Backend API
+      - "80:80" # Frontend (nginx)
+      - "11434:11434" # Ollama API (opcional, para acceso externo)
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - AUTO_START_SCHEDULER=true
+      # Variables de AI - Ollama integrado
+      - AI_PROVIDER=${AI_PROVIDER:-ollama}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OLLAMA_URL=http://127.0.0.1:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2}
+      # Modelo a descargar automáticamente al iniciar
+      - OLLAMA_PULL_MODEL=${OLLAMA_PULL_MODEL:-llama3.2}
+    volumes:
+      # Persistir la base de datos SQLite
+      - ./data:/app/backend/data
+      # Persistir logs
+      - ./logs:/app/backend/logs
+      # Persistir modelos de Ollama
+      - ollama_models:/root/.ollama
+    # Recursos para Puppeteer y Ollama
+    shm_size: '2gb'
+    cap_add:
+      - SYS_ADMIN
+    # Recursos recomendados para Ollama
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+
+volumes:
+  ollama_models:
