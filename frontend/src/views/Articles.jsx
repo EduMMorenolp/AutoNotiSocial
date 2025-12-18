@@ -119,12 +119,13 @@ function Articles({ toast }) {
                             
                             <div className="article-meta">
                                 <span className="badge badge-info">{article.source_name}</span>
+                                {article.has_summary === 1 && <span className="badge badge-success">✅ Resumido</span>}
                                 <span>📅 {formatRelativeTime(article.scraped_at)}</span>
                                 {article.author && <span>✍️ {article.author}</span>}
                             </div>
                             
                             {article.content && (
-                                <p className="article-content">
+                                <p className="article-content" style={{ display: '-webkit-box', WebkitLineClamp: '3', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                     {truncate(article.content, 200)}
                                 </p>
                             )}
@@ -134,13 +135,15 @@ function Articles({ toast }) {
                                     className="btn btn-secondary btn-sm"
                                     onClick={() => handleViewDetails(article)}
                                 >
-                                    👁️ Ver detalles
+                                    👁️ Detalles
                                 </button>
                                 <button 
                                     className="btn btn-primary btn-sm"
                                     onClick={() => handleGenerateSummary(article)}
+                                    disabled={article.has_summary === 1}
+                                    title={article.has_summary === 1 ? 'Resumen ya generado' : 'Generar resumen con IA'}
                                 >
-                                    🤖 Generar Resumen
+                                    {article.has_summary === 1 ? '✨ Resumido' : '🤖 Resumir'}
                                 </button>
                                 <a 
                                     href={article.url} 
@@ -148,7 +151,7 @@ function Articles({ toast }) {
                                     rel="noopener noreferrer"
                                     className="btn btn-secondary btn-sm"
                                 >
-                                    🔗 Ver original
+                                    🔗 Abrir
                                 </a>
                             </div>
                         </div>

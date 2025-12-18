@@ -7,9 +7,11 @@ const { db } = require('../init');
  */
 function getAll(filters = {}) {
     let query = `
-        SELECT a.*, s.name as source_name 
+        SELECT a.*, s.name as source_name, 
+        CASE WHEN sum.id IS NOT NULL THEN 1 ELSE 0 END as has_summary
         FROM articles a
         JOIN sources s ON a.source_id = s.id
+        LEFT JOIN summaries sum ON a.id = sum.article_id
         WHERE 1=1
     `;
     const params = [];

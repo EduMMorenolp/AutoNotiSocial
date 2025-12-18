@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import * as api from "../services/api";
 import { getFaviconUrl } from "../utils/helpers";
+import CronVisualizer from "../components/CronVisualizer";
 
 function Sources({ toast }) {
   const [sources, setSources] = useState([]);
@@ -357,30 +358,14 @@ function Sources({ toast }) {
                       color: "var(--text-secondary)",
                     }}
                   >
-                    ⏰ Programación
+                    ⏰ Programación (Scheduler)
                   </h3>
 
                   <div className="form-group">
-                    <label className="form-label">
-                      Frecuencia de monitoreo
-                    </label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={formData.schedule}
-                      onChange={(e) =>
-                        setFormData({ ...formData, schedule: e.target.value })
-                      }
-                      placeholder="0 */6 * * *"
+                    <CronVisualizer 
+                      value={formData.schedule} 
+                      onChange={(val) => setFormData({ ...formData, schedule: val })} 
                     />
-                    <small
-                      style={{ color: "var(--text-muted)", fontSize: "12px" }}
-                    >
-                      <strong>Ejemplos:</strong> <br />•{" "}
-                      <code>0 */6 * * *</code> - Cada 6 horas <br />•{" "}
-                      <code>0 9 * * *</code> - Diariamente a las 9:00 AM <br />•{" "}
-                      <code>*/30 * * * *</code> - Cada 30 minutos
-                    </small>
                   </div>
                 </div>
 
@@ -584,305 +569,164 @@ function Sources({ toast }) {
                   <div className="spinner"></div>
                 </div>
               ) : (
-                <div>
-                  <p
-                    style={{
-                      fontSize: "14px",
-                      color: "var(--text-muted)",
-                      marginBottom: "24px",
-                    }}
-                  >
+                <div className="templates-container">
+                  <p className="modal-description">
                     Selecciona una plantilla pre-configurada para agregar
-                    rápidamente una fuente de noticias
+                    rápidamente una fuente de noticias.
                   </p>
 
-                  {/* Trending Topics */}
-                  {templates.trending && templates.trending.length > 0 && (
-                    <div style={{ marginBottom: "24px" }}>
-                      <h3
-                        style={{
-                          fontSize: "16px",
-                          fontWeight: "600",
-                          marginBottom: "12px",
-                          color: "var(--text)",
-                        }}
-                      >
-                        📈 Trending Topics
-                      </h3>
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns:
-                            "repeat(auto-fill, minmax(250px, 1fr))",
-                          gap: "12px",
-                        }}
-                      >
-                        {templates.trending.map((template, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleAddTemplate(template)}
-                            className="template-btn"
-                            style={{
-                              padding: "12px",
-                              background: "var(--bg-secondary)",
-                              border: "1px solid var(--border)",
-                              borderRadius: "8px",
-                              cursor: "pointer",
-                              textAlign: "left",
-                              fontSize: "13px",
-                            }}
-                          >
-                            <div
-                              style={{ fontWeight: "600", marginBottom: "4px" }}
-                            >
-                              {template.name}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                color: "var(--text-muted)",
-                              }}
-                            >
-                              {template.category}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Releases */}
-                  {templates.releases && templates.releases.length > 0 && (
-                    <div style={{ marginBottom: "24px" }}>
-                      <h3
-                        style={{
-                          fontSize: "16px",
-                          fontWeight: "600",
-                          marginBottom: "12px",
-                          color: "var(--text)",
-                        }}
-                      >
-                        🚀 Lanzamientos y Versiones
-                      </h3>
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns:
-                            "repeat(auto-fill, minmax(250px, 1fr))",
-                          gap: "12px",
-                        }}
-                      >
-                        {templates.releases.map((template, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleAddTemplate(template)}
-                            className="template-btn"
-                            style={{
-                              padding: "12px",
-                              background: "var(--bg-secondary)",
-                              border: "1px solid var(--border)",
-                              borderRadius: "8px",
-                              cursor: "pointer",
-                              textAlign: "left",
-                              fontSize: "13px",
-                            }}
-                          >
-                            <div
-                              style={{ fontWeight: "600", marginBottom: "4px" }}
-                            >
-                              {template.name}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                color: "var(--text-muted)",
-                              }}
-                            >
-                              {template.category}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Newsletters */}
-                  {templates.newsletters &&
-                    templates.newsletters.length > 0 && (
-                      <div style={{ marginBottom: "24px" }}>
-                        <h3
-                          style={{
-                            fontSize: "16px",
-                            fontWeight: "600",
-                            marginBottom: "12px",
-                            color: "var(--text)",
-                          }}
-                        >
-                          📬 Newsletters Semanales
+                  <div className="template-sections">
+                    {/* Trending Topics */}
+                    {templates.trending && templates.trending.length > 0 && (
+                      <div className="nav-section">
+                        <h3 className="nav-section-title" style={{ paddingLeft: 0, paddingBottom: '12px', fontSize: '14px' }}>
+                          📈 Trending Topics
                         </h3>
-                        <div
-                          style={{
-                            display: "grid",
-                            gridTemplateColumns:
-                              "repeat(auto-fill, minmax(250px, 1fr))",
-                            gap: "12px",
-                          }}
-                        >
-                          {templates.newsletters.map((template, index) => (
+                        <div className="templates-grid">
+                          {templates.trending.map((template, index) => (
                             <button
                               key={index}
                               type="button"
                               onClick={() => handleAddTemplate(template)}
-                              className="template-btn"
-                              style={{
-                                padding: "12px",
-                                background: "var(--bg-secondary)",
-                                border: "1px solid var(--border)",
-                                borderRadius: "8px",
-                                cursor: "pointer",
-                                textAlign: "left",
-                                fontSize: "13px",
-                              }}
+                              className="template-card-btn"
                             >
-                              <div
-                                style={{
-                                  fontWeight: "600",
-                                  marginBottom: "4px",
-                                }}
-                              >
-                                {template.name}
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: "11px",
-                                  color: "var(--text-muted)",
-                                }}
-                              >
-                                {template.category}
-                              </div>
+                              <div className="template-name">{template.name}</div>
+                              <div className="template-category">{template.category}</div>
+                              <div className="template-action">⚡ Agregar</div>
                             </button>
                           ))}
                         </div>
                       </div>
                     )}
 
-                  {/* Popular */}
-                  {templates.popular && templates.popular.length > 0 && (
-                    <div style={{ marginBottom: "24px" }}>
-                      <h3
-                        style={{
-                          fontSize: "16px",
-                          fontWeight: "600",
-                          marginBottom: "12px",
-                          color: "var(--text)",
-                        }}
-                      >
-                        🔥 Por Relevancia
-                      </h3>
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns:
-                            "repeat(auto-fill, minmax(250px, 1fr))",
-                          gap: "12px",
-                        }}
-                      >
-                        {templates.popular.map((template, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleAddTemplate(template)}
-                            className="template-btn"
-                            style={{
-                              padding: "12px",
-                              background: "var(--bg-secondary)",
-                              border: "1px solid var(--border)",
-                              borderRadius: "8px",
-                              cursor: "pointer",
-                              textAlign: "left",
-                              fontSize: "13px",
-                            }}
-                          >
-                            <div
-                              style={{ fontWeight: "600", marginBottom: "4px" }}
+                    {/* Releases */}
+                    {templates.releases && templates.releases.length > 0 && (
+                      <div className="nav-section">
+                        <h3 className="nav-section-title" style={{ paddingLeft: 0, paddingBottom: '12px', fontSize: '14px' }}>
+                          🚀 Lanzamientos y Versiones
+                        </h3>
+                        <div className="templates-grid">
+                          {templates.releases.map((template, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => handleAddTemplate(template)}
+                              className="template-card-btn"
                             >
-                              {template.name}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                color: "var(--text-muted)",
-                              }}
-                            >
-                              {template.category}
-                            </div>
-                          </button>
-                        ))}
+                              <div className="template-name">{template.name}</div>
+                              <div className="template-category">{template.category}</div>
+                              <div className="template-action">⚡ Agregar</div>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Spanish */}
-                  {templates.spanish && templates.spanish.length > 0 && (
-                    <div>
-                      <h3
-                        style={{
-                          fontSize: "16px",
-                          fontWeight: "600",
-                          marginBottom: "12px",
-                          color: "var(--text)",
-                        }}
-                      >
-                        🇪🇸 Fuentes en Español
-                      </h3>
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns:
-                            "repeat(auto-fill, minmax(250px, 1fr))",
-                          gap: "12px",
-                        }}
-                      >
-                        {templates.spanish.map((template, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleAddTemplate(template)}
-                            className="template-btn"
-                            style={{
-                              padding: "12px",
-                              background: "var(--bg-secondary)",
-                              border: "1px solid var(--border)",
-                              borderRadius: "8px",
-                              cursor: "pointer",
-                              textAlign: "left",
-                              fontSize: "13px",
-                            }}
-                          >
-                            <div
-                              style={{ fontWeight: "600", marginBottom: "4px" }}
+                    {/* Newsletters */}
+                    {templates.newsletters && templates.newsletters.length > 0 && (
+                      <div className="nav-section">
+                        <h3 className="nav-section-title" style={{ paddingLeft: 0, paddingBottom: '12px', fontSize: '14px' }}>
+                          📬 Newsletters Semanales
+                        </h3>
+                        <div className="templates-grid">
+                          {templates.newsletters.map((template, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => handleAddTemplate(template)}
+                              className="template-card-btn"
                             >
-                              {template.name}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                color: "var(--text-muted)",
-                              }}
-                            >
-                              {template.category}
-                            </div>
-                          </button>
-                        ))}
+                              <div className="template-name">{template.name}</div>
+                              <div className="template-category">{template.category}</div>
+                              <div className="template-action">⚡ Agregar</div>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+
+                    {/* Popular */}
+                    {templates.popular && templates.popular.length > 0 && (
+                      <div className="nav-section">
+                        <h3 className="nav-section-title" style={{ paddingLeft: 0, paddingBottom: '12px', fontSize: '14px' }}>
+                          🔥 Por Relevancia
+                        </h3>
+                        <div className="templates-grid">
+                          {templates.popular.map((template, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => handleAddTemplate(template)}
+                              className="template-card-btn"
+                            >
+                              <div className="template-name">{template.name}</div>
+                              <div className="template-category">{template.category}</div>
+                              <div className="template-action">⚡ Agregar</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
-
+            
+            <style>{`
+              .modal-description {
+                font-size: 14px;
+                color: var(--text-secondary);
+                margin-bottom: 24px;
+              }
+              .templates-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 16px;
+                margin-bottom: 32px;
+              }
+              .template-card-btn {
+                padding: 16px;
+                background: var(--bg-tertiary);
+                border: 1px solid var(--border-color);
+                border-radius: var(--border-radius);
+                cursor: pointer;
+                text-align: left;
+                transition: var(--transition-fast);
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                position: relative;
+                overflow: hidden;
+              }
+              .template-card-btn:hover {
+                border-color: var(--accent-primary);
+                transform: translateY(-2px);
+                background: var(--bg-hover);
+              }
+              .template-name {
+                font-weight: 600;
+                color: var(--text-primary);
+                font-size: 14px;
+              }
+              .template-category {
+                font-size: 12px;
+                color: var(--text-muted);
+              }
+              .template-action {
+                margin-top: 8px;
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: var(--accent-primary);
+                opacity: 0;
+                transform: translateY(10px);
+                transition: var(--transition-fast);
+              }
+              .template-card-btn:hover .template-action {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            `}</style>
             <div className="modal-footer">
               <button
                 type="button"

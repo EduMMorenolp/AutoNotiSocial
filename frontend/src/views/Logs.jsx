@@ -78,6 +78,37 @@ function Logs({ toast }) {
                     </div>
                 )}
             </div>
+            <style>{`
+                .log-entry {
+                    padding: 8px 12px;
+                    border-bottom: 1px solid var(--border-color);
+                    display: flex;
+                    gap: 12px;
+                    font-family: 'Consolas', 'Monaco', monospace;
+                    font-size: 13px;
+                    align-items: center;
+                }
+                .log-entry:hover {
+                    background: var(--bg-hover);
+                }
+                .log-level {
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                    text-transform: uppercase;
+                    font-size: 10px;
+                    font-weight: 700;
+                    min-width: 60px;
+                    text-align: center;
+                }
+                .log-level.error { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+                .log-level.warn { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+                .log-level.info { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+                .log-level.debug { background: rgba(160, 160, 184, 0.2); color: var(--text-muted); }
+                
+                .log-time { color: var(--text-muted); min-width: 140px; }
+                .log-category { color: var(--accent-secondary); font-weight: 600; min-width: 80px; }
+                .log-message { color: var(--text-primary); }
+            `}</style>
         </div>
     );
 }
