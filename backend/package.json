@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
+    "seed": "node src/database/seed.js",
     "test:db": "node tests/db.test.js",
     "test:scrape": "node tests/scrape.test.js",
     "test:ai": "node tests/ai.test.js"
