@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import * as api from "../services/api";
 import { getFaviconUrl } from "../utils/helpers";
 
+// Plantillas predefinidas de fuentes
 function Sources({ toast }) {
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [showTemplatesModal, setShowTemplatesModal] = useState(false);
   const [editingSource, setEditingSource] = useState(null);
+  const [showTemplatesModal, setShowTemplatesModal] = useState(false);
   const [templates, setTemplates] = useState({});
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [formData, setFormData] = useState({
@@ -40,18 +41,6 @@ function Sources({ toast }) {
     }
   }
 
-  async function loadTemplates() {
-    try {
-      setLoadingTemplates(true);
-      const result = await api.getTemplates();
-      setTemplates(result.data || {});
-    } catch (error) {
-      toast.error("Error al cargar plantillas");
-    } finally {
-      setLoadingTemplates(false);
-    }
-  }
-
   function openModal(source = null) {
     if (source) {
       setEditingSource(source);
@@ -62,6 +51,7 @@ function Sources({ toast }) {
         enabled: source.enabled,
         selectors: source.selectors || {},
       });
+      setShowTemplates(false);
     } else {
       setEditingSource(null);
       setFormData({
@@ -77,31 +67,20 @@ function Sources({ toast }) {
           content: "article",
         },
       });
+      setShowTemplates(true);
     }
     setShowModal(true);
   }
 
-  function openTemplatesModal() {
-    setShowTemplatesModal(true);
-    loadTemplates();
-  }
-
-  async function handleAddTemplate(template) {
-    try {
-      const sourceData = {
-        name: template.name,
-        url: template.url,
-        schedule: template.schedule || "0 */6 * * *",
-        enabled: true,
-        selectors: template.selectors,
-      };
-      await api.createSource(sourceData);
-      toast.success(`Fuente "${template.name}" agregada`);
-      setShowTemplatesModal(false);
-      loadSources();
-    } catch (error) {
-      toast.error(error.message || "Error al agregar plantilla");
-    }
+  function applyTemplate(template) {
+    setFormData({
+      name: template.name,
+      url: template.url,
+      schedule: template.schedule || "0 */6 * * *",
+      enabled: true,
+      selectors: template.selectors,
+    });
+    setShowTemplates(false);
   }
 
   async function handleSubmit(e) {
@@ -171,17 +150,9 @@ function Sources({ toast }) {
           <h1 className="page-title">Fuentes</h1>
           <p className="page-subtitle">Gestiona los sitios web a monitorear</p>
         </div>
-        <div style={{ display: "flex", gap: "12px" }}>
-          <button
-            className="btn btn-secondary"
-            onClick={() => openTemplatesModal()}
-          >
-            ⚡ Usar Plantilla
-          </button>
-          <button className="btn btn-primary" onClick={() => openModal()}>
-            + Nueva Fuente
-          </button>
-        </div>
+        <button className="btn btn-primary" onClick={() => openModal()}>
+          + Nueva Fuente
+        </button>
       </div>
 
       {sources.length === 0 ? (
@@ -190,24 +161,13 @@ function Sources({ toast }) {
             <div className="empty-state-icon">🌐</div>
             <h3>No hay fuentes configuradas</h3>
             <p>Agrega tu primera fuente de noticias</p>
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "center",
-                marginTop: "16px",
-              }}
+            <button
+              className="btn btn-primary"
+              style={{ marginTop: "16px" }}
+              onClick={() => openModal()}
             >
-              <button
-                className="btn btn-secondary"
-                onClick={() => openTemplatesModal()}
-              >
-                ⚡ Usar Plantilla
-              </button>
-              <button className="btn btn-primary" onClick={() => openModal()}>
-                + Nueva Fuente
-              </button>
-            </div>
+              + Nueva Fuente
+            </button>
           </div>
         </div>
       ) : (
@@ -270,7 +230,7 @@ function Sources({ toast }) {
         </div>
       )}
 
-      {/* Modal de Edición/Creación */}
+      {/* Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -290,6 +250,180 @@ function Sources({ toast }) {
 
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
+                {/* Selector de Plantillas */}
+                {!editingSource && showTemplates && (
+                  <div style={{ marginBottom: '24px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                        ⚡ Plantillas Rápidas
+                      </h3>
+                      <button 
+                        type="button" 
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => setShowTemplates(false)}
+                      >
+                        Configurar manualmente
+                      </button>
+                    </div>
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                      Selecciona una plantilla pre-configurada para comenzar rápidamente
+                    </p>
+
+                    {/* Trending Topics */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <h4 style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--text)' }}>
+                        📈 Trending Topics
+                      </h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
+                        {SOURCE_TEMPLATES.trending.map((template, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => applyTemplate(template)}
+                            className="template-btn"
+                            style={{
+                              padding: '8px 12px',
+                              background: 'var(--bg)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              fontSize: '12px'
+                            }}
+                          >
+                            {template.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Releases */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <h4 style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--text)' }}>
+                        🚀 Lanzamientos y Versiones
+                      </h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
+                        {SOURCE_TEMPLATES.releases.map((template, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => applyTemplate(template)}
+                            className="template-btn"
+                            style={{
+                              padding: '8px 12px',
+                              background: 'var(--bg)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              fontSize: '12px'
+                            }}
+                          >
+                            {template.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Newsletters */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <h4 style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--text)' }}>
+                        📬 Newsletters Semanales
+                      </h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
+                        {SOURCE_TEMPLATES.newsletters.map((template, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => applyTemplate(template)}
+                            className="template-btn"
+                            style={{
+                              padding: '8px 12px',
+                              background: 'var(--bg)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              fontSize: '12px'
+                            }}
+                          >
+                            {template.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Popular */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <h4 style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--text)' }}>
+                        🔥 Por Relevancia
+                      </h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
+                        {SOURCE_TEMPLATES.popular.map((template, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => applyTemplate(template)}
+                            className="template-btn"
+                            style={{
+                              padding: '8px 12px',
+                              background: 'var(--bg)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              fontSize: '12px'
+                            }}
+                          >
+                            {template.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Spanish */}
+                    <div>
+                      <h4 style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: 'var(--text)' }}>
+                        🇪🇸 Fuentes en Español
+                      </h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
+                        {SOURCE_TEMPLATES.spanish.map((template, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => applyTemplate(template)}
+                            className="template-btn"
+                            style={{
+                              padding: '8px 12px',
+                              background: 'var(--bg)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              fontSize: '12px'
+                            }}
+                          >
+                            {template.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Botón para mostrar plantillas si está oculto */}
+                {!editingSource && !showTemplates && (
+                  <div style={{ marginBottom: '16px', textAlign: 'center' }}>
+                    <button 
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setShowTemplates(true)}
+                    >
+                      ⚡ Ver Plantillas Rápidas
+                    </button>
+                  </div>
+                )}
+
                 {/* Sección 1: Información Básica */}
                 <div style={{ marginBottom: "24px" }}>
                   <h3
@@ -553,345 +687,6 @@ function Sources({ toast }) {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Plantillas */}
-      {showTemplatesModal && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowTemplatesModal(false)}
-        >
-          <div
-            className="modal"
-            onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: "900px" }}
-          >
-            <div className="modal-header">
-              <h2 className="modal-title">⚡ Plantillas de Fuentes</h2>
-              <button
-                className="modal-close"
-                onClick={() => setShowTemplatesModal(false)}
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="modal-body">
-              {loadingTemplates ? (
-                <div className="loading">
-                  <div className="spinner"></div>
-                </div>
-              ) : (
-                <div>
-                  <p
-                    style={{
-                      fontSize: "14px",
-                      color: "var(--text-muted)",
-                      marginBottom: "24px",
-                    }}
-                  >
-                    Selecciona una plantilla pre-configurada para agregar
-                    rápidamente una fuente de noticias
-                  </p>
-
-                  {/* Trending Topics */}
-                  {templates.trending && templates.trending.length > 0 && (
-                    <div style={{ marginBottom: "24px" }}>
-                      <h3
-                        style={{
-                          fontSize: "16px",
-                          fontWeight: "600",
-                          marginBottom: "12px",
-                          color: "var(--text)",
-                        }}
-                      >
-                        📈 Trending Topics
-                      </h3>
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns:
-                            "repeat(auto-fill, minmax(250px, 1fr))",
-                          gap: "12px",
-                        }}
-                      >
-                        {templates.trending.map((template, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleAddTemplate(template)}
-                            className="template-btn"
-                            style={{
-                              padding: "12px",
-                              background: "var(--bg-secondary)",
-                              border: "1px solid var(--border)",
-                              borderRadius: "8px",
-                              cursor: "pointer",
-                              textAlign: "left",
-                              fontSize: "13px",
-                            }}
-                          >
-                            <div
-                              style={{ fontWeight: "600", marginBottom: "4px" }}
-                            >
-                              {template.name}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                color: "var(--text-muted)",
-                              }}
-                            >
-                              {template.category}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Releases */}
-                  {templates.releases && templates.releases.length > 0 && (
-                    <div style={{ marginBottom: "24px" }}>
-                      <h3
-                        style={{
-                          fontSize: "16px",
-                          fontWeight: "600",
-                          marginBottom: "12px",
-                          color: "var(--text)",
-                        }}
-                      >
-                        🚀 Lanzamientos y Versiones
-                      </h3>
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns:
-                            "repeat(auto-fill, minmax(250px, 1fr))",
-                          gap: "12px",
-                        }}
-                      >
-                        {templates.releases.map((template, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleAddTemplate(template)}
-                            className="template-btn"
-                            style={{
-                              padding: "12px",
-                              background: "var(--bg-secondary)",
-                              border: "1px solid var(--border)",
-                              borderRadius: "8px",
-                              cursor: "pointer",
-                              textAlign: "left",
-                              fontSize: "13px",
-                            }}
-                          >
-                            <div
-                              style={{ fontWeight: "600", marginBottom: "4px" }}
-                            >
-                              {template.name}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                color: "var(--text-muted)",
-                              }}
-                            >
-                              {template.category}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Newsletters */}
-                  {templates.newsletters &&
-                    templates.newsletters.length > 0 && (
-                      <div style={{ marginBottom: "24px" }}>
-                        <h3
-                          style={{
-                            fontSize: "16px",
-                            fontWeight: "600",
-                            marginBottom: "12px",
-                            color: "var(--text)",
-                          }}
-                        >
-                          📬 Newsletters Semanales
-                        </h3>
-                        <div
-                          style={{
-                            display: "grid",
-                            gridTemplateColumns:
-                              "repeat(auto-fill, minmax(250px, 1fr))",
-                            gap: "12px",
-                          }}
-                        >
-                          {templates.newsletters.map((template, index) => (
-                            <button
-                              key={index}
-                              type="button"
-                              onClick={() => handleAddTemplate(template)}
-                              className="template-btn"
-                              style={{
-                                padding: "12px",
-                                background: "var(--bg-secondary)",
-                                border: "1px solid var(--border)",
-                                borderRadius: "8px",
-                                cursor: "pointer",
-                                textAlign: "left",
-                                fontSize: "13px",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  fontWeight: "600",
-                                  marginBottom: "4px",
-                                }}
-                              >
-                                {template.name}
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: "11px",
-                                  color: "var(--text-muted)",
-                                }}
-                              >
-                                {template.category}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                  {/* Popular */}
-                  {templates.popular && templates.popular.length > 0 && (
-                    <div style={{ marginBottom: "24px" }}>
-                      <h3
-                        style={{
-                          fontSize: "16px",
-                          fontWeight: "600",
-                          marginBottom: "12px",
-                          color: "var(--text)",
-                        }}
-                      >
-                        🔥 Por Relevancia
-                      </h3>
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns:
-                            "repeat(auto-fill, minmax(250px, 1fr))",
-                          gap: "12px",
-                        }}
-                      >
-                        {templates.popular.map((template, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleAddTemplate(template)}
-                            className="template-btn"
-                            style={{
-                              padding: "12px",
-                              background: "var(--bg-secondary)",
-                              border: "1px solid var(--border)",
-                              borderRadius: "8px",
-                              cursor: "pointer",
-                              textAlign: "left",
-                              fontSize: "13px",
-                            }}
-                          >
-                            <div
-                              style={{ fontWeight: "600", marginBottom: "4px" }}
-                            >
-                              {template.name}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                color: "var(--text-muted)",
-                              }}
-                            >
-                              {template.category}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Spanish */}
-                  {templates.spanish && templates.spanish.length > 0 && (
-                    <div>
-                      <h3
-                        style={{
-                          fontSize: "16px",
-                          fontWeight: "600",
-                          marginBottom: "12px",
-                          color: "var(--text)",
-                        }}
-                      >
-                        🇪🇸 Fuentes en Español
-                      </h3>
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns:
-                            "repeat(auto-fill, minmax(250px, 1fr))",
-                          gap: "12px",
-                        }}
-                      >
-                        {templates.spanish.map((template, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleAddTemplate(template)}
-                            className="template-btn"
-                            style={{
-                              padding: "12px",
-                              background: "var(--bg-secondary)",
-                              border: "1px solid var(--border)",
-                              borderRadius: "8px",
-                              cursor: "pointer",
-                              textAlign: "left",
-                              fontSize: "13px",
-                            }}
-                          >
-                            <div
-                              style={{ fontWeight: "600", marginBottom: "4px" }}
-                            >
-                              {template.name}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                color: "var(--text-muted)",
-                              }}
-                            >
-                              {template.category}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setShowTemplatesModal(false)}
-              >
-                Cerrar
-              </button>
-            </div>
           </div>
         </div>
       )}
