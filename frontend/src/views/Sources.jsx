@@ -105,6 +105,39 @@ function Sources({ toast }) {
     }
   }
 
+  async function handleAddMultipleTemplates(templatesArray) {
+    if (
+      !confirm(`¿Agregar las ${templatesArray.length} fuentes de esta sección?`)
+    )
+      return;
+
+    try {
+      toast.info(`Agregando ${templatesArray.length} fuentes...`);
+      let count = 0;
+      for (const template of templatesArray) {
+        try {
+          const sourceData = {
+            name: template.name,
+            url: template.url,
+            schedule: template.schedule || "0 */6 * * *",
+            enabled: true,
+            selectors: template.selectors,
+          };
+          await api.createSource(sourceData);
+          count++;
+        } catch (err) {
+          console.warn(`Saltando ${template.name}: ${err.message}`);
+        }
+      }
+      toast.success(`${count} fuentes agregadas correctamente`);
+      setShowTemplatesModal(false);
+      loadSources();
+    } catch (error) {
+      toast.error("Error al procesar la agregación masiva");
+      loadSources();
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -576,97 +609,80 @@ function Sources({ toast }) {
                   </p>
 
                   <div className="template-sections">
-                    {/* Trending Topics */}
-                    {templates.trending && templates.trending.length > 0 && (
-                      <div className="nav-section">
-                        <h3 className="nav-section-title" style={{ paddingLeft: 0, paddingBottom: '12px', fontSize: '14px' }}>
-                          📈 Trending Topics
-                        </h3>
-                        <div className="templates-grid">
-                          {templates.trending.map((template, index) => (
-                            <button
-                              key={index}
-                              type="button"
-                              onClick={() => handleAddTemplate(template)}
-                              className="template-card-btn"
-                            >
-                              <div className="template-name">{template.name}</div>
-                              <div className="template-category">{template.category}</div>
-                              <div className="template-action">⚡ Agregar</div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    {Object.entries(templates).map(([key, items]) => {
+                      if (!items || items.length === 0) return null;
 
-                    {/* Releases */}
-                    {templates.releases && templates.releases.length > 0 && (
-                      <div className="nav-section">
-                        <h3 className="nav-section-title" style={{ paddingLeft: 0, paddingBottom: '12px', fontSize: '14px' }}>
-                          🚀 Lanzamientos y Versiones
-                        </h3>
-                        <div className="templates-grid">
-                          {templates.releases.map((template, index) => (
-                            <button
-                              key={index}
-                              type="button"
-                              onClick={() => handleAddTemplate(template)}
-                              className="template-card-btn"
-                            >
-                              <div className="template-name">{template.name}</div>
-                              <div className="template-category">{template.category}</div>
-                              <div className="template-action">⚡ Agregar</div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      const sectionMap = {
+                        trending: { title: "📈 Trending Topics", icon: "📈" },
+                        releases: {
+                          title: "🚀 Lanzamientos y Versiones",
+                          icon: "🚀",
+                        },
+                        newsletters: {
+                          title: "📬 Newsletters Semanales",
+                          icon: "📬",
+                        },
+                        popular: { title: "🔥 Por Relevancia", icon: "🔥" },
+                        spanish: { title: "🇪🇸 Tecnología en Español", icon: "🇪🇸" },
+                      };
 
-                    {/* Newsletters */}
-                    {templates.newsletters && templates.newsletters.length > 0 && (
-                      <div className="nav-section">
-                        <h3 className="nav-section-title" style={{ paddingLeft: 0, paddingBottom: '12px', fontSize: '14px' }}>
-                          📬 Newsletters Semanales
-                        </h3>
-                        <div className="templates-grid">
-                          {templates.newsletters.map((template, index) => (
-                            <button
-                              key={index}
-                              type="button"
-                              onClick={() => handleAddTemplate(template)}
-                              className="template-card-btn"
-                            >
-                              <div className="template-name">{template.name}</div>
-                              <div className="template-category">{template.category}</div>
-                              <div className="template-action">⚡ Agregar</div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      const config = sectionMap[key] || {
+                        title: key,
+                        icon: "🌐",
+                      };
 
-                    {/* Popular */}
-                    {templates.popular && templates.popular.length > 0 && (
-                      <div className="nav-section">
-                        <h3 className="nav-section-title" style={{ paddingLeft: 0, paddingBottom: '12px', fontSize: '14px' }}>
-                          🔥 Por Relevancia
-                        </h3>
-                        <div className="templates-grid">
-                          {templates.popular.map((template, index) => (
-                            <button
-                              key={index}
-                              type="button"
-                              onClick={() => handleAddTemplate(template)}
-                              className="template-card-btn"
+                      return (
+                        <div key={key} className="nav-section">
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              paddingBottom: "12px",
+                              borderBottom: "1px solid var(--border-color)",
+                              marginBottom: "16px",
+                            }}
+                          >
+                            <h3
+                              className="nav-section-title"
+                              style={{
+                                paddingLeft: 0,
+                                paddingBottom: 0,
+                                fontSize: "15px",
+                                margin: 0,
+                              }}
                             >
-                              <div className="template-name">{template.name}</div>
-                              <div className="template-category">{template.category}</div>
-                              <div className="template-action">⚡ Agregar</div>
+                              {config.title}
+                            </h3>
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              style={{ fontSize: "11px", padding: "4px 8px" }}
+                              onClick={() => handleAddMultipleTemplates(items)}
+                            >
+                              + Agregar Todo ({items.length})
                             </button>
-                          ))}
+                          </div>
+                          <div className="templates-grid">
+                            {items.map((template, index) => (
+                              <button
+                                key={index}
+                                type="button"
+                                onClick={() => handleAddTemplate(template)}
+                                className="template-card-btn"
+                              >
+                                <div className="template-name">
+                                  {template.name}
+                                </div>
+                                <div className="template-category">
+                                  {template.category}
+                                </div>
+                                <div className="template-action">⚡ Agregar</div>
+                              </button>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      );
+                    })}
                   </div>
                 </div>
               )}

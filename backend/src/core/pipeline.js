@@ -32,9 +32,13 @@ async function processSource(source, options = {}) {
     try {
         // Step 1: Scrape articles
         schedulerLogger.info(`Processing source: ${source.name}`);
+        
+        // Auto-detect if Puppeteer is needed
+        const actualUsePuppeteer = usePuppeteer || scraper.needsPuppeteer(source.url);
+        
         result.scraping = await scraper.scrapeAndSave(source, {
             fetchContent: true,
-            usePuppeteer,
+            usePuppeteer: actualUsePuppeteer,
             limit
         });
 

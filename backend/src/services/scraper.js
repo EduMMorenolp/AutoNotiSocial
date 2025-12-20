@@ -291,16 +291,23 @@ async function scrapeAndSave(source, options = {}) {
  */
 const defaultSelectors = {
     'dev.to': {
-        articleList: '.crayons-story',
-        title: '.crayons-story__title a',
-        image: '.crayons-story__cover img',
-        author: '.crayons-story__meta a.crayons-story__secondary',
-        content: '.crayons-article__main'
+        articleList: 'div.crayons-story',
+        title: 'h2.crayons-story__title a, a[id^="article-link-"]',
+        image: 'div.crayons-story__cover img, .crayons-story__image img',
+        author: '.crayons-story__meta a.crayons-story__secondary, .crayons-story__secondary a',
+        content: '.crayons-article__main, #article-body'
+    },
+    'medium.com': {
+        articleList: 'article, div.pw-home-feed-item',
+        title: 'h2, h3, a[href*="?source=topic_portal"]',
+        image: 'img',
+        author: '.pw-author-name, [data-testid="authorName"]',
+        content: 'section'
     },
     'news.ycombinator.com': {
         articleList: '.athing',
         title: '.titleline a',
-        content: null // HN links to external sites
+        content: null
     },
     'techcrunch.com': {
         articleList: 'article.post-block',
@@ -308,15 +315,18 @@ const defaultSelectors = {
         image: 'img.post-block__media',
         author: '.post-block__author-link',
         content: '.article-content'
-    },
-    'smashingmagazine.com': {
-        articleList: 'article.article--post',
-        title: 'h2.article--post__title a',
-        image: 'img.article--post__image',
-        author: '.article--post__author-name',
-        content: '.c-garfield-the-cat'
     }
 };
+
+/**
+ * Check if a URL typically requires Puppeteer
+ * @param {string} url - URL to check
+ * @returns {boolean} True if Puppeteer recommended
+ */
+function needsPuppeteer(url) {
+    const jsRequiredSites = ['medium.com', 'bloomberg.com', 'theverge.com', 'wired.com'];
+    return jsRequiredSites.some(site => url.includes(site));
+}
 
 /**
  * Get default selectors for a URL
@@ -341,5 +351,6 @@ module.exports = {
     fetchArticleContent,
     scrapeAndSave,
     getDefaultSelectors,
+    needsPuppeteer,
     defaultSelectors
 };
